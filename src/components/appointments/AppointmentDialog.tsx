@@ -8,12 +8,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, Search, Plus } from "lucide-react";
+import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import PatientSearchDialog from "./PatientSearchDialog";
+import { PatientAutocomplete } from "./PatientAutocomplete";
+import { NewPatientMiniDialog } from "./NewPatientMiniDialog";
 
 interface AppointmentDialogProps {
   open: boolean;
@@ -27,7 +28,8 @@ const AppointmentDialog = ({ open, onOpenChange, appointment, defaultDate }: App
   const [loading, setLoading] = useState(false);
   const [doctors, setDoctors] = useState<any[]>([]);
   const [selectedPatient, setSelectedPatient] = useState<any>(null);
-  const [showPatientSearch, setShowPatientSearch] = useState(false);
+  const [showNewPatientDialog, setShowNewPatientDialog] = useState(false);
+  const [newPatientSearchTerm, setNewPatientSearchTerm] = useState("");
   
   const [formData, setFormData] = useState({
     date: defaultDate || new Date(),
@@ -126,35 +128,14 @@ const AppointmentDialog = ({ open, onOpenChange, appointment, defaultDate }: App
             {/* Patient Selection */}
             <div className="space-y-2">
               <Label>Paciente *</Label>
-              {selectedPatient ? (
-                <div className="flex items-center justify-between p-3 border rounded-md bg-muted/50">
-                  <div>
-                    <p className="font-medium">{selectedPatient.first_name} {selectedPatient.last_name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {selectedPatient.dni && `DNI: ${selectedPatient.dni} - `}
-                      Tel: {selectedPatient.phone}
-                    </p>
-                  </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowPatientSearch(true)}
-                  >
-                    Cambiar
-                  </Button>
-                </div>
-              ) : (
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => setShowPatientSearch(true)}
-                >
-                  <Search className="h-4 w-4 mr-2" />
-                  Buscar Paciente
-                </Button>
-              )}
+              <PatientAutocomplete
+                value={selectedPatient}
+                onChange={setSelectedPatient}
+                onNewPatientClick={(searchTerm) => {
+                  setNewPatientSearchTerm(searchTerm);
+                  setShowNewPatientDialog(true);
+                }}
+              />
             </div>
 
             {/* Doctor Selection */}
@@ -262,13 +243,14 @@ const AppointmentDialog = ({ open, onOpenChange, appointment, defaultDate }: App
         </DialogContent>
       </Dialog>
 
-      <PatientSearchDialog
-        open={showPatientSearch}
-        onOpenChange={setShowPatientSearch}
-        onSelect={(patient) => {
+      <NewPatientMiniDialog
+        open={showNewPatientDialog}
+        onOpenChange={setShowNewPatientDialog}
+        onPatientCreated={(patient) => {
           setSelectedPatient(patient);
-          setShowPatientSearch(false);
+          setShowNewPatientDialog(false);
         }}
+        initialSearchTerm={newPatientSearchTerm}
       />
     </>
   );
