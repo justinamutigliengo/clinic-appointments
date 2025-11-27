@@ -3,10 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Calendar, Plus, LogOut, Users, Stethoscope } from "lucide-react";
+import { Calendar, Plus, LogOut, Users, Stethoscope, CalendarDays, TableIcon } from "lucide-react";
 import AppointmentsTable from "@/components/appointments/AppointmentsTable";
 import AppointmentFilters from "@/components/appointments/AppointmentFilters";
 import AppointmentDialog from "@/components/appointments/AppointmentDialog";
+import WeeklyCalendar from "@/components/appointments/WeeklyCalendar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
 
 const Dashboard = () => {
@@ -17,6 +19,7 @@ const Dashboard = () => {
   const [selectedDoctor, setSelectedDoctor] = useState<string>("all");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingAppointment, setEditingAppointment] = useState<any>(null);
+  const [viewMode, setViewMode] = useState<string>("calendar");
 
   useEffect(() => {
     checkAuth();
@@ -117,12 +120,35 @@ const Dashboard = () => {
             onDoctorChange={setSelectedDoctor}
           />
 
-          {/* Appointments Table */}
-          <AppointmentsTable
-            selectedDate={selectedDate}
-            selectedDoctor={selectedDoctor}
-            onEdit={handleEditAppointment}
-          />
+          {/* Tabs for Calendar/Table View */}
+          <Tabs value={viewMode} onValueChange={setViewMode} className="w-full">
+            <TabsList className="grid w-full max-w-[400px] grid-cols-2">
+              <TabsTrigger value="calendar">
+                <CalendarDays className="h-4 w-4 mr-2" />
+                Calendario
+              </TabsTrigger>
+              <TabsTrigger value="table">
+                <TableIcon className="h-4 w-4 mr-2" />
+                Lista
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="calendar" className="mt-6">
+              <WeeklyCalendar
+                selectedDate={selectedDate}
+                selectedDoctor={selectedDoctor}
+                onEdit={handleEditAppointment}
+              />
+            </TabsContent>
+
+            <TabsContent value="table" className="mt-6">
+              <AppointmentsTable
+                selectedDate={selectedDate}
+                selectedDoctor={selectedDoctor}
+                onEdit={handleEditAppointment}
+              />
+            </TabsContent>
+          </Tabs>
         </div>
       </main>
 
