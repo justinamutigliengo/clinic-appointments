@@ -18,7 +18,6 @@ TurnosClinic es una aplicación web moderna para la gestión eficiente de citas 
 - **🔍 Búsqueda Inteligente**: Autocompletado de pacientes con creación rápida inline
 - **👥 Gestión de Pacientes**: Base de datos completa con información demográfica y de contacto
 - **⚡ Actualizaciones en Tiempo Real**: Sincronización automática de cambios entre usuarios
-- **🎨 Interfaz Profesional**: Diseño médico con tema adaptable (claro/oscuro)
 - **📱 Responsive**: Funciona perfectamente en dispositivos móviles y tablets
 - **🔐 Autenticación Segura**: Sistema de login y registro de usuarios
 - **🏷️ Estados de Turnos**: Seguimiento de pendiente, confirmado, atendido, cancelado y ausente
