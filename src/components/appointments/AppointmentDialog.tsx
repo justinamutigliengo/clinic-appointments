@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon } from "lucide-react";
-import { format } from "date-fns";
+import { format, isWeekend } from "date-fns";
 import { es } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -85,12 +85,57 @@ const AppointmentDialog = ({ open, onOpenChange, appointment, defaultDate }: App
       return;
     }
 
+    if (!formData.doctor_id) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Debe seleccionar un médico",
+      });
+      return;
+    }
+
+    // Check for weekend
+    if (isWeekend(formData.date)) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "No se pueden agendar turnos los fines de semana",
+      });
+      return;
+    }
+
     setLoading(true);
+
+    // Check for existing appointment at same date/time/doctor
+    const dateStr = format(formData.date, "yyyy-MM-dd");
+    let existingQuery = supabase
+      .from("appointments")
+      .select("id")
+      .eq("date", dateStr)
+      .eq("time", formData.time)
+      .eq("doctor_id", formData.doctor_id)
+      .neq("status", "cancelled");
+
+    if (appointment) {
+      existingQuery = existingQuery.neq("id", appointment.id);
+    }
+
+    const { data: existingAppointments } = await existingQuery;
+
+    if (existingAppointments && existingAppointments.length > 0) {
+      setLoading(false);
+      toast({
+        variant: "destructive",
+        title: "Horario no disponible",
+        description: "Ya existe un turno para ese médico en la fecha y hora seleccionadas",
+      });
+      return;
+    }
 
     const appointmentData = {
       patient_id: selectedPatient.id,
       doctor_id: formData.doctor_id,
-      date: format(formData.date, "yyyy-MM-dd"),
+      date: dateStr,
       time: formData.time,
       status: formData.status,
       reason: formData.reason,
@@ -181,6 +226,7 @@ const AppointmentDialog = ({ open, onOpenChange, appointment, defaultDate }: App
                       mode="single"
                       selected={formData.date}
                       onSelect={(date) => date && setFormData({ ...formData, date })}
+                      disabled={(date) => isWeekend(date)}
                       initialFocus
                       className="pointer-events-auto"
                     />
