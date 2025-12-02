@@ -106,7 +106,7 @@ const AppointmentPopover = ({
             <div className="flex items-center gap-3">
               <Calendar className="h-4 w-4 text-muted-foreground" />
               <div>
-                {format(new Date(appointment.date), "d 'de' MMMM 'de' yyyy", { locale: es })}
+                {format(new Date(appointment.date + "T12:00:00"), "d 'de' MMMM 'de' yyyy", { locale: es })}
               </div>
             </div>
 
